@@ -61,5 +61,6 @@ function addProduct(e) {
 }
 
 socket.on('products', data => {
+    console.log(data);
     renderProd(data);
 })

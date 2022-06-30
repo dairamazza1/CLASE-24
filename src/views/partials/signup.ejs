@@ -2,19 +2,19 @@
 
 <div class="container my-5">
 
-  <h1>SIGNUP</h1>
+  <legend>Registro de usuario</legend>
   <br>
   <form class="form" role="form" action="/signup" method="post" autocomplete="off">
 
     <div class="form-group">
       <input name='username' placeholder="Nombre" class="form-control" type="text" required>
     </div>
-    <div class="form-group">
-      <input name='password' placeholder="Password" class="form-control" type="password" required>
-    </div>
-<% /* %>
     <br>
-
+    <div class="form-group">
+      <input name='password' placeholder="Contraseña" class="form-control" type="password" required>
+    </div>
+    <br>
+<% /* %>
     <div class="form-group">
       <input name='firstname' placeholder="firstname" class="form-control" type="text" required>
     </div>
@@ -26,17 +26,18 @@
     <div class="form-group">
       <input name='email' placeholder="email" class="form-control" type="email" required>
     </div> -->
-
-    <div class="form-group">
-      <input class="btn btn-success my-3" type="submit" value="Singup">
-    </div>
-  </form>
 <% */ %>
-  <hr>
-  <form action="/">
-    <div class="text-center"></div>
-        <button class="btn btn-info my-3">Back to home page</button>
+    <div class="form-group">
+      <input class="btn btn-secondary btn-sm" type="submit" value="Singup">
     </div>
+
+    <hr>
+    <form action="/login">
+      <div class="text-center"></div>
+          <button class="btn btn-secondary btn-sm">Ir a Login</button>
+      </div>
+    </form>
+
   </form>
 
 </div>

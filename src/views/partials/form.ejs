@@ -2,10 +2,11 @@
 <div class="container-fluid">
 
   <% if (isUser) { %>
+    <br>
     <div class="alert alert-secondary" role="alert">
       Bienvenido <%= user.username %>    
       <form method="get" action="/logout">
-        <input type="hidden"  id="name" value= <% name %> name="name">
+        <input type="hidden"  id="name" value= <% user.username %> name="name">
         <button class="btn btn-secondary btn-sm" type="submit">Logout</button>
       </form>
     </div>
@@ -26,7 +27,7 @@
             <input class="form-control" type="text" id="thumbnail" name ="thumbnail" required>
             </div>
             <div class="mb-3">
-              <button type="submit"  class="btn btn-primary mb-3"> Enviar </button>
+              <button type="submit"  class="btn btn-secondary btn-sm"> Enviar </button>
             </div>
       </form>
 

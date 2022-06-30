@@ -5,7 +5,7 @@ class ContenedorMongoDB{
     /* --------------------------------------- */
     /*     conexión hacia la base de datos     */
     /* --------------------------------------- */
-        const URL = 'mongodb+srv://test:test@cluster0.cwmksz4.mongodb.net/?retryWrites=true&w=majority';
+        const URL = 'mongodb+srv://test:1111@cluster0.cwmksz4.mongodb.net/?retryWrites=true&w=majority';
 
         mongoose.connect(URL, {
           useNewUrlParser: true, 

@@ -2,6 +2,7 @@
 const express = require('express')
 const app = express();
 const PORT = 8080;
+const session = require("express-session");
 
 // AUTHORIZATION & AUTHENTICATION
 const passport = require('passport');
@@ -10,33 +11,17 @@ const LocalStrategy = require('passport-local').Strategy;
 // DEPENDENCIAS
 const { percentage } = require('./src/utils/percentage') 
 const { normalizr } = require('./src/utils/normalizrChat')
-// const { userLogged } = require("./utils/mdwSession");
 const { TIEMPO_EXPIRACION } = require('./src/config/globals')
 const {validatePass} = require('./src/utils/passValidator');
 const {createHash} = require('./src/utils/hashGenerator')
 const routes = require('./src/routes/routes')
+const UserModel = require('./src/models/usuarios');
 
-
-// MIDDLEWARE
-app.use(express.json()); 
-app.use(express.urlencoded({extended:true}))
-app.use(passport.initialize())
-app.use(passport.session())
-
-// VIEWS
-app.set('view engine', 'ejs'); //se define extensión (motor de plantilla)
-app.use(express.static(__dirname + "/public"));
 
 //COOKIES - PERSISTENCIA MONGO
-const session = require("express-session");
-const cookieParser = require("cookie-parser");
-// const MongoStore = require('connect-mongo');
-app.use(cookieParser())
 const advancedOptions = { useNewUrlParser: true , useUnifiedTopology: true }
 
 app.use(session({
-//store: MongoStore.create({ mongoUrl: 'mongodb://localhost/sesiones'}),
-// store: MongoStore.create({ mongoUrl: 'mongodb+srv://test:1111@cluster0.cwmksz4.mongodb.net/?retryWrites=true&w=majority'}),
     secret: 'daira',
     resave: true,
     saveUninitialized: true,
@@ -48,6 +33,17 @@ app.use(session({
       }
     })
 );
+
+// MIDDLEWARE
+app.use(express.json()); 
+app.use(express.urlencoded({extended:true}))
+app.use(passport.initialize())
+app.use(passport.session())
+
+// VIEWS
+app.set('views', __dirname + '/src/views');
+app.set('view engine', 'ejs'); //se define extensión (motor de plantilla)
+app.use(express.static(__dirname + "/public"));
 
 passport.use('login', new LocalStrategy(
     (username, password, callback) => {
@@ -79,7 +75,6 @@ passport.use('signup', new LocalStrategy(
                 console.log('Hay un error al registrarse');
                 return callback(err)
             }
-
             if (user) {
                 console.log('El usuario ya existe');
                 return callback(null, false)
@@ -88,15 +83,9 @@ passport.use('signup', new LocalStrategy(
             console.log(req.body);
 
             const newUser = {
-                firstName: req.body.firstname,
-                lastName: req.body.lastname,
-                email: req.body.email,
                 username: username,
                 password: createHash(password)
             }
-
-            console.log(newUser);
-
 
             UserModel.create(newUser, (err, userWithId) => {
                 if (err) {
@@ -123,10 +112,10 @@ passport.deserializeUser((id, callback) => {
 })
 
 // DAOS
-const { ProductoDaoArchivo } = require('./daos/productos/ProductosDaoArchivo');
+const { ProductoDaoArchivo } = require('./src/daos/productos/ProductosDaoArchivo');
 let product = new ProductoDaoArchivo();
 
-const { ChatDaoArchivo } = require('./daos/chat/ChatDaoArchivo');
+const { ChatDaoArchivo } = require('./src/daos/chat/ChatDaoArchivo');
 let chat = new ChatDaoArchivo();
 
 
@@ -139,6 +128,7 @@ const io = new IOServer(httpServer);
 
 //Productos WEB SOCKET 
 io.on('connection', async(socket) => {
+    // console.log("entró");
     const prod = await product.getAll().then( (obj) =>{
         socket.emit('products', obj);
     })
@@ -171,8 +161,7 @@ io.on('connection', async (socket) => {
         let compression = percentage(dataComprimida, dataNocomprimida);
         
         try {
-            console.log("compression");
-            console.log(compression);
+
             socket.emit("compression", compression);
           } catch (error) {
             console.log(error);
@@ -183,7 +172,7 @@ io.on('connection', async (socket) => {
 
 //*******************   ENDPOINTS   **********************
 
-//  INDEX
+//  HOME PAGE
 app.get('/', routes.getRoot);
 
 //  LOGIN
@@ -199,76 +188,11 @@ app.get('/failsignup', routes.getFailsignup);
 //  LOGOUT
 app.get('/logout', routes.getLogout);
 
-
-// PROFILE
+// PRODUCTS
 app.get('/products', routes.getProducts);
-
-app.get('/ruta-protegida', routes.checkAuthentication, (req, res) => {
-    res.render('protected')
-});
 
 //  FAIL ROUTE
 app.get('*', routes.failRoute);
-
-/*
-app.get('/', userLogged, async (req, res) =>{
-    const prod = await product.getAll().then( (obj) =>{
-        obj.length  > 0 ?  res.render('pages/index', {listExists: true, listNotExists: false,  name : req.session.user }) : res.render('pages/index', {listNotExists: true, listExists: false,  name : req.session.user}) ;
-    })  
-})
-
-app.get("/login", (req, res) => {
-    try {
-        if (req.session.user) {
-            res.redirect('/');
-        }
-        res.render('pages/log', {login : true, logout : false});
-    } catch (error) {
-        console.log(error);
-    }
-    
-  });
-
-  app.post('/login', (req, res) => {
-    let username = req.body.user;
-    req.session.user = username;
-    req.session.logged = true;
-    res.redirect('/');
-})
-
-app.get("/logout", (req, res) => {
-    req.session.destroy((error) => {
-      if (error) {
-        res.send({ status: "Logout Error", body: error });
-      }else {
-        let name = req.body.user
-        console.log(name);
-        res.render('pages/log', { name , logout : true, login : false})
-    }
-    });
-  });
-
-//PRODUCTOS FAKER 
-app.post('/productos-test', async (req, res, next) => {
-    try {
-        res.json(await product.popular(req.query.cant));
-    } catch (error) {
-        next(error);
-    }
-})
-
-app.get('/productos-test', async (req, res, next) => {
-    try {
-        let products = product.getAll().then(obj => {
-            res.json({allProducts: obj});       
-        });   
-    } catch (error) {
-        next(error);
-    }
-})
-*/
-//*******************************************************
- 
 
 //SERVIDOR
 const server = httpServer.listen(PORT, () =>{

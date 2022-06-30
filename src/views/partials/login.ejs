@@ -2,13 +2,28 @@
 <div class="container-fluid">
     <legend>Login del usuario</legend>
           <form action="/login"  method="post">
-          <!-- <form onsubmit="addLogg(this)"> -->
               <div class="mb-3">
-              <label for="name" class="form-label">Nombre</label>
-              <input class="form-control" type="text" id="user" name ="user" required>
+                <label for="name" class="form-label">Nombre</label>
+                <input class="form-control" type="text" id="username" name ="username" required>
+              </div>
+
               <div class="mb-3">
-                <button type="submit"  class="btn btn-primary mb-3"> Enviar </button>
+                <label for="password" class="form-label">Contraseña</label>
+                <input class="form-control" type="password" id="password" name ="password" required>
+              </div>
+
+              <div class="mb-3">
+                <button type="submit"  class="btn btn-secondary btn-sm"> Login </button>
               </div>
         </form>
+
+        <hr>
+    <form action="/signup">
+      <div class="text-center"></div>
+          <button class="btn btn-secondary btn-sm">Ir a Registro</button>
+      </div>
+    </form>
+  
   </div>
+  
 <% } %>

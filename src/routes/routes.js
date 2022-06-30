@@ -8,24 +8,28 @@ let chat = new ChatDaoArchivo();
 
 //ROUTES
 function getRoot(req, res) {
-    res.render('pages/log', {main: true});
+        res.render('pages/log', {main: true, login: false, signup : false, loginError: false, signupLogout: false , logout : false , error : false});
+        //res.render('pages/log', {main: true});
 }
 
 function getLogin(req, res) {
     if (req.isAuthenticated()) {
-        res.redirect('profile')
+        res.redirect('products')
     } else {
-        res.render('pages/log', {login : true});
+        //res.render('pages/log', {login : true});
+        res.render('pages/log', {main: false, login: true, signup : false, loginError: false, signupLogout: false, logout : false , error : false});
     }
 }
 
 function getSignup(req, res) {
-    res.render('pages/log', {signup : true});
+    // res.render('pages/log', {signup : true});
+    res.render('pages/log', {main: false, login: false, signup : true, loginError: false, signupLogout: false, logout : false , error : false});
+
 }
 
 function postLogin (req, res) {
     if (req.isAuthenticated()) {
-        res.redirect('profile')
+        res.redirect('products')
     } else {
         res.redirect('login')
     }
@@ -33,68 +37,49 @@ function postLogin (req, res) {
 
 function postSignup (req, res) {
     if (req.isAuthenticated()) {
-        res.redirect('profile')
+        res.redirect('products')
     } else {
         res.redirect('login')
     }
 }
 
-// function getProfile (req, res) {
-//     if (req.isAuthenticated()) {
-//         let user = req.user;
-//         res.render('profileUser', { user: user, isUser:true })
-//     } else {
-//         res.redirect('login')
-//     }
-// }
-
- function getProducts (req, res){
+async function getProducts (req, res){
     if (req.isAuthenticated()) {
         let user = req.user;
-
-        const prod = product.getAll();
-        prod.length > 0 ? res.render( 'pages/index', {listExists: true, listNotExists: false, user: user, isUser:true}) : res.render('pages/index', {listNotExists: true, listExists: false, user: user, isUser:true})
+        const prod = await product.getAll().then( (obj) =>{
+            obj.length > 0 ? res.render( 'pages/index', {listExists: true, listNotExists: false, user: user, isUser:true}) : res.render('pages/index', {listNotExists: true, listExists: false, user: user, isUser:true})
+        }) 
     } else {
         res.redirect('login')
     }
 }
-
-// function getProducts async(req, res) =>{
-//     const prod = await product.getAll().then( (obj) =>{
-//         obj.length  > 0 ?  res.render('pages/index', {listExists: true, listNotExists: false,  name : req.session.user }) : res.render('pages/index', {listNotExists: true, listExists: false,  name : req.session.user}) ;
-//     })  
-// })
 
 function getFaillogin (req, res) {
     console.log('error en login');
-    res.render('login-error', {});
+    //res.render('pages/log', {error: true});
+    res.render('pages/log', {main: false, login: false, signup : false, loginError: true, signupLogout: false, logout : false , error : false});
 }
 
 function getFailsignup (req, res) {
     console.log('error en signup');
-    res.render('signup-error', {});
+    //res.render('signup-error', {error: true});
+     res.render('pages/log', {main: false, login: false, signup : false, loginError: false, signupLogout: true, logout : false , error : false});
 }
 
 function getLogout (req, res) {
     req.logout( (err) => {
         if (!err) {
-            res.render('main');
+            let user = req.body.name;
+            //res.render('pages/log', { logout : false})
+            res.render('pages/log', {main: false, login: false, signup : false, loginError: false, signupLogout: false, logout : true, name: user , error : false});
         } 
     });
 }
 
 function failRoute(req, res){
-    res.status(404).render('routing-error', {});
+    res.status(404).render('pages/log', {main: false, login: false, signup : false, loginError: false, signupLogout: false, logout : false , error : true});
 }
 
-function checkAuthentication(req, res, next) {
-    if (req.isAuthenticated()) {
-        //req.isAuthenticated() will return true if user is logged in
-        next();
-    } else {
-        res.redirect("/login");
-    }
-}
 
 module.exports = {
     getRoot,
@@ -106,6 +91,5 @@ module.exports = {
     getSignup,
     postSignup,
     getFailsignup,
-    checkAuthentication,
     getProducts
 }

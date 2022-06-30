@@ -4,7 +4,7 @@ const {generarId} = require('../../utils/generadorDeIds')
 
 class ProductoDaoArchivo extends ContenedorArchivo{
     constructor() {
-        super('./data/products.txt');
+        super('./src/data/products.txt');
         let products = this.getAll().then(res=>{
             this.id = (res.length > 0) ? res.length + 1 : 1;
         });
